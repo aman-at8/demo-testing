@@ -1,5 +1,5 @@
 const { ApiError, sendAccountVerificationEmail } = require("../../utils");
-const { findAllStudents, findStudentDetail, findStudentToSetStatus, addOrUpdateStudent } = require("./students-repository");
+const { findAllStudents, findStudentDetail, findStudentToSetStatus, addOrUpdateStudent, deleteStudentById } = require("./students-repository");
 const { findUserById } = require("../../shared/repository");
 
 const checkStudentId = async (id) => {
@@ -33,8 +33,11 @@ const addNewStudent = async (payload) => {
     const ADD_STUDENT_AND_EMAIL_SEND_SUCCESS = "Student added and verification email sent successfully.";
     const ADD_STUDENT_AND_BUT_EMAIL_SEND_FAIL = "Student added, but failed to send verification email.";
     try {
+        console.debug("Service: About to call addOrUpdateStudent with payload:", payload);
         const result = await addOrUpdateStudent(payload);
+        console.debug("Service: addOrUpdateStudent result:", result);
         if (!result.status) {
+            console.debug("Service: Result status is false, message:", result.message);
             throw new ApiError(500, result.message);
         }
 
@@ -45,7 +48,8 @@ const addNewStudent = async (payload) => {
             return { message: ADD_STUDENT_AND_BUT_EMAIL_SEND_FAIL }
         }
     } catch (error) {
-        throw new ApiError(500, "Unable to add student");
+        console.debug("Service: Error in addNewStudent:", error);
+        throw new ApiError(500, error.message || "Unable to add student");
     }
 }
 
@@ -69,10 +73,22 @@ const setStudentStatus = async ({ userId, reviewerId, status }) => {
     return { message: "Student status changed successfully" };
 }
 
+const deleteStudent = async (studentId) => {
+    await checkStudentId(studentId);
+
+    const affectedRows = await deleteStudentById(studentId);
+    if (affectedRows <= 0) {
+        throw new ApiError(500, "Unable to delete student");
+    }
+
+    return { message: "Student deleted successfully" };
+}
+
 module.exports = {
     getAllStudents,
     getStudentDetail,
     addNewStudent,
     setStudentStatus,
     updateStudent,
+    deleteStudent,
 };
