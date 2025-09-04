@@ -111,11 +111,24 @@ const findStudentToUpdate = async (paylaod) => {
     return rows;
 }
 
+const deleteStudentById = async (studentId) => {
+    // We don't actually delete the user, we just deactivate them for data integrity
+    const query = `
+        UPDATE users
+        SET is_active = false, updated_dt = $1
+        WHERE id = $2 AND role_id = 3
+    `;
+    const queryParams = [new Date(), studentId];
+    const { rowCount } = await processDBRequest({ query, queryParams });
+    return rowCount;
+}
+
 module.exports = {
     getRoleId,
     findAllStudents,
     addOrUpdateStudent,
     findStudentDetail,
     findStudentToSetStatus,
-    findStudentToUpdate
+    findStudentToUpdate,
+    deleteStudentById
 };
