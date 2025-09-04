@@ -1,0 +1,507 @@
+{
+	"info": {
+		"_postman_id": "student-mgmt-api-collection",
+		"name": "Student Management API",
+		"description": "Complete CRUD operations for Student Management System",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    console.log('Login successful - cookies set automatically');",
+									"    ",
+									"    // Extract CSRF token from cookies",
+									"    const csrfToken = pm.cookies.get('csrfToken');",
+									"    if (csrfToken) {",
+									"        pm.environment.set('csrfToken', csrfToken);",
+									"        console.log('CSRF Token extracted and saved:', csrfToken);",
+									"    } else {",
+									"        console.error('CSRF token not found in cookies');",
+									"    }",
+									"    ",
+									"    // Store user info for reference",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.id) {",
+									"        pm.environment.set('userId', responseJson.id);",
+									"        console.log('User ID saved:', responseJson.id);",
+									"    }",
+									"} else {",
+									"    console.error('Login failed with status:', pm.response.code);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin@school-admin.com\",\n    \"password\": \"3OU4zn3q6Zh9\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with admin credentials to get authentication cookies"
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout and clear authentication cookies"
+					}
+				}
+			],
+			"description": "Authentication endpoints for getting access to protected routes"
+		},
+		{
+			"name": "Students CRUD",
+			"item": [
+				{
+					"name": "Get All Students",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students"
+							]
+						},
+						"description": "Get list of all students"
+					}
+				},
+				{
+					"name": "Get All Students with Filters",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/students?name=John&className=Grade 10&section=A&page=1&limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "John",
+									"description": "Filter by student name"
+								},
+								{
+									"key": "className",
+									"value": "Grade 10",
+									"description": "Filter by class name"
+								},
+								{
+									"key": "section",
+									"value": "A",
+									"description": "Filter by section"
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Page number for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"description": "Number of items per page"
+								}
+							]
+						},
+						"description": "Get students with various filters and pagination"
+					}
+				},
+				{
+					"name": "Create New Student",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    console.log('Student created successfully');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operationType\": \"add\",\n    \"reporterId\": 1,\n    \"basicDetails\": {\n        \"name\": \"John Doe\",\n        \"email\": \"john.doe@student.com\",\n        \"roleId\": 3\n    },\n    \"additionalDetails\": {\n        \"gender\": \"Male\",\n        \"phone\": \"+1234567890\",\n        \"dob\": \"2005-01-15\",\n        \"className\": \"Grade 10\",\n        \"sectionName\": \"A\",\n        \"roll\": 101,\n        \"fatherName\": \"Robert Doe\",\n        \"fatherPhone\": \"+1234567891\",\n        \"motherName\": \"Mary Doe\",\n        \"motherPhone\": \"+1234567892\",\n        \"currentAddress\": \"123 Main St, City, State\",\n        \"permanentAddress\": \"123 Main St, City, State\",\n        \"admissionDate\": \"2024-01-15\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students"
+							]
+						},
+						"description": "Create a new student with complete details"
+					}
+				},
+				{
+					"name": "Create Student - Minimal Data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operationType\": \"add\",\n    \"reporterId\": 1,\n    \"basicDetails\": {\n        \"name\": \"Jane Smith\",\n        \"email\": \"jane.smith@student.com\",\n        \"roleId\": 3\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students"
+							]
+						},
+						"description": "Create a student with only required fields"
+					}
+				},
+				{
+					"name": "Get Student by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/students/{{studentId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students",
+								"{{studentId}}"
+							]
+						},
+						"description": "Get detailed information about a specific student"
+					}
+				},
+				{
+					"name": "Update Student",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operationType\": \"update\",\n    \"reporterId\": 1,\n    \"userId\": {{studentId}},\n    \"basicDetails\": {\n        \"name\": \"John Updated Doe\",\n        \"email\": \"john.updated@student.com\",\n        \"roleId\": 3\n    },\n    \"additionalDetails\": {\n        \"gender\": \"Male\",\n        \"phone\": \"+1234567899\",\n        \"dob\": \"2005-01-15\",\n        \"className\": \"Grade 11\",\n        \"sectionName\": \"B\",\n        \"roll\": 102,\n        \"currentAddress\": \"456 Updated St, New City, State\",\n        \"systemAccess\": true\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/students/{{studentId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students",
+								"{{studentId}}"
+							]
+						},
+						"description": "Update an existing student's information"
+					}
+				},
+				{
+					"name": "Change Student Status - Activate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": true,\n    \"reviewerId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/students/{{studentId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students",
+								"{{studentId}}",
+								"status"
+							]
+						},
+						"description": "Activate a student's account"
+					}
+				},
+				{
+					"name": "Change Student Status - Deactivate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": false,\n    \"reviewerId\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/students/{{studentId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students",
+								"{{studentId}}",
+								"status"
+							]
+						},
+						"description": "Deactivate a student's account"
+					}
+				},
+				{
+					"name": "Delete Student",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/students/{{studentId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students",
+								"{{studentId}}"
+							]
+						},
+						"description": "Soft delete a student (deactivates the account)"
+					}
+				}
+			],
+			"description": "Complete CRUD operations for student management"
+		},
+		{
+			"name": "Validation Tests",
+			"item": [
+				{
+					"name": "Invalid Email Format",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operationType\": \"add\",\n    \"reporterId\": 1,\n    \"basicDetails\": {\n        \"name\": \"Invalid Email User\",\n        \"email\": \"invalid-email-format\",\n        \"roleId\": 3\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students"
+							]
+						},
+						"description": "Test validation with invalid email format - should return 400 error"
+					}
+				},
+				{
+					"name": "Missing Required Fields",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operationType\": \"add\",\n    \"basicDetails\": {\n        \"name\": \"Missing Reporter ID\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students"
+							]
+						},
+						"description": "Test validation with missing required fields - should return 400 error"
+					}
+				},
+				{
+					"name": "Invalid Phone Number",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"operationType\": \"add\",\n    \"reporterId\": 1,\n    \"basicDetails\": {\n        \"name\": \"Invalid Phone User\",\n        \"email\": \"invalid.phone@student.com\",\n        \"roleId\": 3\n    },\n    \"additionalDetails\": {\n        \"phone\": \"invalid-phone-123\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students"
+							]
+						},
+						"description": "Test validation with invalid phone number format - should return 400 error"
+					}
+				},
+				{
+					"name": "Invalid Student ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/students/invalid-id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students",
+								"invalid-id"
+							]
+						},
+						"description": "Test with invalid student ID - should return 400 error"
+					}
+				},
+				{
+					"name": "Non-existent Student",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/students/99999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students",
+								"99999"
+							]
+						},
+						"description": "Test with non-existent student ID - should return 404 error"
+					}
+				}
+			],
+			"description": "Test validation and error handling"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Skip CSRF for login endpoint",
+					"if (pm.request.url.path && pm.request.url.path.includes('login')) {",
+					"    return;",
+					"}",
+					"",
+					"// Get CSRF token from environment (set during login)",
+					"const csrfToken = pm.environment.get('csrfToken');",
+					"if (csrfToken) {",
+					"    console.log('Adding CSRF token to request:', csrfToken);",
+					"    pm.request.headers.upsert({",
+					"        key: 'X-CSRF-Token',",
+					"        value: csrfToken",
+					"    });",
+					"} else {",
+					"    console.warn('CSRF token not found. Please login first.');",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5007/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "studentId",
+			"value": "4",
+			"type": "string",
+			"description": "ID of a student to use in tests (update this with actual student ID)"
+		}
+	]
+}

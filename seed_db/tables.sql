@@ -355,6 +355,16 @@ BEGIN
         _operationType := 'update';
     END IF;
 
+    -- Auto-create class if it doesn't exist
+    IF _className IS NOT NULL AND NOT EXISTS(SELECT 1 FROM classes WHERE name = _className) THEN
+        INSERT INTO classes (name) VALUES (_className);
+    END IF;
+
+    -- Auto-create section if it doesn't exist
+    IF _sectionName IS NOT NULL AND NOT EXISTS(SELECT 1 FROM sections WHERE name = _sectionName) THEN
+        INSERT INTO sections (name) VALUES (_sectionName);
+    END IF;
+
     SELECT teacher_id
     FROM class_teachers
     WHERE class_name = _className AND section_name = _sectionName
